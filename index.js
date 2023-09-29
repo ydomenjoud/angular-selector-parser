@@ -15,6 +15,7 @@ const _SELECTOR_REGEXP = new RegExp('(\\:not\\()|' + // 1: ":not("
   '(\\))|' + // 7: ")"
   '(\\s*,\\s*)', // 8: ","
   'g');
+
 /**
  * A css selector contains an element name,
  * css classes and attribute/value pairs with the purpose
@@ -38,6 +39,7 @@ class CssSelector {
     this.attrs = [];
     this.notSelectors = [];
   }
+
   static parse(selector) {
     const results = [];
     const _addResult = (res, cssSel) => {
@@ -67,12 +69,10 @@ class CssSelector {
         if (prefix === '#') {
           // #hash
           current.addAttribute('id', tag.slice(1));
-        }
-        else if (prefix === '.') {
+        } else if (prefix === '.') {
           // Class
           current.addClassName(tag.slice(1));
-        }
-        else {
+        } else {
           // Element
           current.setElement(tag);
         }
@@ -96,6 +96,7 @@ class CssSelector {
     _addResult(results, cssSelector);
     return results;
   }
+
   /**
    * Unescape `\$` sequences from the CSS attribute selector.
    *
@@ -124,6 +125,7 @@ class CssSelector {
     }
     return result;
   }
+
   /**
    * Escape `$` sequences from the CSS attribute selector.
    *
@@ -137,16 +139,20 @@ class CssSelector {
   escapeAttribute(attr) {
     return attr.replace(/\\/g, '\\\\').replace(/\$/g, '\\$');
   }
+
   isElementSelector() {
     return this.hasElementSelector() && this.classNames.length == 0 && this.attrs.length == 0 &&
       this.notSelectors.length === 0;
   }
+
   hasElementSelector() {
     return !!this.element;
   }
+
   setElement(element = null) {
     this.element = element;
   }
+
   getAttrs() {
     const result = [];
     if (this.classNames.length > 0) {
@@ -154,12 +160,15 @@ class CssSelector {
     }
     return result.concat(this.attrs);
   }
+
   addAttribute(name, value = '') {
     this.attrs.push(name, value && value.toLowerCase() || '');
   }
+
   addClassName(name) {
     this.classNames.push(name.toLowerCase());
   }
+
   toString() {
     let res = this.element || '';
     if (this.classNames) {
@@ -176,6 +185,7 @@ class CssSelector {
     return res;
   }
 }
+
 /**
  * Reads a list of CssSelectors and allows to calculate which ones
  * are contained in a given CssSelector.
@@ -190,11 +200,13 @@ class SelectorMatcher {
     this._attrValuePartialMap = new Map();
     this._listContexts = [];
   }
+
   static createNotMatcher(notSelectors) {
     const notMatcher = new SelectorMatcher();
     notMatcher.addSelectables(notSelectors, null);
     return notMatcher;
   }
+
   addSelectables(cssSelectors, callbackCtxt) {
     let listContext = null;
     if (cssSelectors.length > 1) {
@@ -205,6 +217,7 @@ class SelectorMatcher {
       this._addSelectable(cssSelectors[i], callbackCtxt, listContext);
     }
   }
+
   /**
    * Add an object that can be found later on by calling `match`.
    * @param cssSelector A css selector
@@ -220,8 +233,7 @@ class SelectorMatcher {
       const isTerminal = attrs.length === 0 && classNames.length === 0;
       if (isTerminal) {
         this._addTerminal(matcher._elementMap, element, selectable);
-      }
-      else {
+      } else {
         matcher = this._addPartial(matcher._elementPartialMap, element);
       }
     }
@@ -231,8 +243,7 @@ class SelectorMatcher {
         const className = classNames[i];
         if (isTerminal) {
           this._addTerminal(matcher._classMap, className, selectable);
-        }
-        else {
+        } else {
           matcher = this._addPartial(matcher._classPartialMap, className);
         }
       }
@@ -250,8 +261,7 @@ class SelectorMatcher {
             terminalMap.set(name, terminalValuesMap);
           }
           this._addTerminal(terminalValuesMap, value, selectable);
-        }
-        else {
+        } else {
           const partialMap = matcher._attrValuePartialMap;
           let partialValuesMap = partialMap.get(name);
           if (!partialValuesMap) {
@@ -263,6 +273,7 @@ class SelectorMatcher {
       }
     }
   }
+
   _addTerminal(map, name, selectable) {
     let terminalList = map.get(name);
     if (!terminalList) {
@@ -271,6 +282,7 @@ class SelectorMatcher {
     }
     terminalList.push(selectable);
   }
+
   _addPartial(map, name) {
     let matcher = map.get(name);
     if (!matcher) {
@@ -279,6 +291,7 @@ class SelectorMatcher {
     }
     return matcher;
   }
+
   /**
    * Find the objects that have been added via `addSelectable`
    * whose css selector is contained in the given css selector.
@@ -328,6 +341,7 @@ class SelectorMatcher {
     }
     return result;
   }
+
   /** @internal */
   _matchTerminal(map, name, cssSelector, matchedCallback) {
     if (!map || typeof name !== 'string') {
@@ -349,6 +363,7 @@ class SelectorMatcher {
     }
     return result;
   }
+
   /** @internal */
   _matchPartial(map, name, cssSelector, matchedCallback) {
     if (!map || typeof name !== 'string') {
@@ -364,12 +379,14 @@ class SelectorMatcher {
     return nestedSelector.match(cssSelector, matchedCallback);
   }
 }
+
 class SelectorListContext {
   constructor(selectors) {
     this.selectors = selectors;
     this.alreadyMatched = false;
   }
 }
+
 // Store context to pass back selector and context when a selector is matched
 class SelectorContext {
   constructor(selector, cbContext, listContext) {
@@ -378,6 +395,7 @@ class SelectorContext {
     this.listContext = listContext;
     this.notSelectors = selector.notSelectors;
   }
+
   finalize(cssSelector, callback) {
     let result = true;
     if (this.notSelectors.length > 0 && (!this.listContext || !this.listContext.alreadyMatched)) {
@@ -394,9 +412,26 @@ class SelectorContext {
   }
 }
 
+const selectorsQueryParamName = 'selectors';
+
 document.addEventListener('DOMContentLoaded', () => {
   const origin = document.getElementById('origin');
   const parsed = document.getElementById('parsed');
+  const share = document.getElementById('share');
+
+  // get selectors in query
+  const url = new URL(window.location);
+  const querySelectors = url.searchParams.get(selectorsQueryParamName);
+  if (querySelectors) {
+    try {
+      const data = JSON.parse(atob(querySelectors));
+      if (data.join) {
+        origin.value = data.join('\n');
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   const parseContent = () => {
     const selectorsList = origin.value.split('\n');
@@ -404,10 +439,19 @@ document.addEventListener('DOMContentLoaded', () => {
       .map(s => s.replace(/^ +/g, ''))
       .map(CssSelector.parse)
       .join('\n');
-  }
+
+    // update share link
+    const shareURL = new URL(window.location);
+    shareURL.searchParams.set(
+      selectorsQueryParamName,
+      btoa(JSON.stringify(selectorsList))
+    );
+    share.href = shareURL.href;
+  };
 
   // first pass
   parseContent();
 
-  origin.addEventListener('keyup', e => parseContent())
+  origin.addEventListener('keyup', e => parseContent());
+
 });
