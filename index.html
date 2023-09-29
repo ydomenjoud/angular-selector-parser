@@ -10,7 +10,11 @@
         section > * { flex: 1 1 50%;}
         label { display: block }
         a { color: #555 }
-        h1 { display: flex; justify-content: space-between}
+        h1 { display: flex; justify-content: space-between; text-align: center}
+        @media screen and (max-width: 500px) {
+            section { flex-direction: column}
+            blockquote{ max-height: 100px; overflow-y: scroll}
+        }
     </style>
 </head>
 <body>
@@ -25,7 +29,9 @@
     Angular only allows directives to apply on CSS selectors that do not cross element boundaries
      (<a href="https://github.com/angular/angular/blob/316c91b1a47f1fb574045553288acca5fcb6e354/packages/core/src/metadata/directives.ts#L131-L132">source</a>),
     meaning all CSS combinators  ( > ~ + and "space" ) are forbidden.<br />
-    So, how did angular deal with them when transforming CSS selector of Directive | Component ? <br />
+    So, how did angular deal with it throught their parser
+    (<a href="https://github.com/angular/angular/blob/a532d71975bef463223fd5d8322e3140760c9134/packages/compiler/src/selector.ts#L57" target="_blank">CssSelector.parse</a>)
+    for  CSS selector of Directive | Component ? <br />
 
 </blockquote>
 <main>
@@ -45,7 +51,7 @@ input > .selected
         </article>
         <article>
             <label>
-                Selector parsed by <a href="https://github.com/angular/angular/blob/a532d71975bef463223fd5d8322e3140760c9134/packages/compiler/src/selector.ts#L57" target="_blank">CssSelector.parse</a>
+                Output by
                 <textarea id="parsed" readonly></textarea>
             </label>
         </article>
