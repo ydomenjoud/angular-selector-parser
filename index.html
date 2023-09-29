@@ -16,6 +16,9 @@
             section { flex-direction: column}
             blockquote{ max-height: 100px; overflow-y: scroll}
         }
+        @media (prefers-color-scheme: dark) {
+            a { color: bisque}
+        }
     </style>
 </head>
 <body>
@@ -52,7 +55,7 @@ input > .selected
         </article>
         <article>
             <label>
-                Output by
+                Result after Angular parser
                 <textarea id="parsed" readonly></textarea>
             </label>
         </article>
