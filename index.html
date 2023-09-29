@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angular Selector Parser</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <script src="index.js" defer></script>
+    <style>
+        section { display: flex; gap: 10px }
+        section > * { flex: 1 1 50%;}
+        label { display: block }
+    </style>
+</head>
+<body>
+
+<h1>Angular selector parser</h1>
+<blockquote>
+    Angular only allows directives to apply on CSS selectors that do not cross element boundarie,
+    meaning all CSS combinators  ( > ~ + and "space" ) are forbidden.<br />
+    So, how did angular deal with them when transforming CSS selector of Directive | Component ? <br />
+
+</blockquote>
+<main>
+
+    <section>
+        <article>
+            <label>
+                CSS selectors
+                <textarea id="origin">
+input[text]
+input.selected
+input > .selected
+.selected input
+                </textarea>
+            </label>
+        </article>
+        <article>
+            <label>
+                Selector after angular parser
+                <textarea id="parsed" readonly></textarea>
+            </label>
+        </article>
+    </section>
+
+</main>
+
+</body>
+</html>
